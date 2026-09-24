@@ -22,6 +22,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-24
+
 ### Changed
 - Rename the PyPI package from `atv-remote-server` to `windows-apple-remote` to match the repository and the PyPI trusted publisher; the `atv-remote` command and `atv_remote` import are unchanged.
 
