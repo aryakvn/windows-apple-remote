@@ -50,12 +50,14 @@ SERVICE_TYPES = [
     "com.apple.devicediscoveryui.rapportwake",
 ]
 
+# The remote is used as a media controller: directions and taps map to media keys,
+# the same as touchpad swipes.
 HID_ACTIONS = {
-    HidCommand.Up: "up",
-    HidCommand.Down: "down",
-    HidCommand.Left: "left",
-    HidCommand.Right: "right",
-    HidCommand.Select: "select",
+    HidCommand.Up: "volume_up",
+    HidCommand.Down: "volume_down",
+    HidCommand.Left: "previous",
+    HidCommand.Right: "next",
+    HidCommand.Select: "play_pause",  # a tap on the touch area arrives as Select
     HidCommand.Menu: "back",
     HidCommand.PlayPause: "play_pause",
     HidCommand.VolumeUp: "volume_up",
@@ -73,10 +75,10 @@ MEDIA_FLAGS = (
     | MediaControlFlags.Pause
     | MediaControlFlags.NextTrack
     | MediaControlFlags.PreviousTrack
-    | MediaControlFlags.SkipForward
-    | MediaControlFlags.SkipBackward
+    | MediaControlFlags.Volume  # lets the iPhone's volume buttons control the PC
 )
-SWIPE_FRACTION = 0.25  # swipe must cover this share of the touchpad to count
+SWIPE_FRACTION = 0.15  # swipe must cover this share of the touchpad to count
+VOLUME_STEP_FRACTION = 0.1  # each extra 10% of vertical swipe = one more volume step
 
 
 class _RefTable(list):
@@ -191,6 +193,7 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         self._client_verify_pub = None
         self._touchpad = (1000.0, 1000.0)
         self._touch_start = None
+        self._volume = 0.5  # what we last told the iPhone; SetVolume moves relative to it
 
     # asyncio.Protocol
 
@@ -333,10 +336,15 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
             self._act(HID_ACTIONS.get(_enum(HidCommand, content.get("_hidC"))))
         elif ident == "_mcc":
             command = _enum(MediaControlCommand, content.get("_mcc"))
-            if command == MediaControlCommand.SkipBy:
-                self._act("right" if content.get("_skpS", 0) > 0 else "left")
-            elif command == MediaControlCommand.GetVolume:
-                reply = {"_vol": 0.5}
+            if command == MediaControlCommand.GetVolume:
+                reply = {"_vol": self._volume}
+            elif command == MediaControlCommand.SetVolume:
+                # ponytail: absolute volume becomes one key step up/down; reading and setting
+                # the real Windows volume needs the COM audio API (pycaw) if this feels off.
+                new = content.get("_vol", self._volume)
+                if new != self._volume:
+                    self._act("volume_up" if new > self._volume else "volume_down")
+                self._volume = new
             else:
                 self._act(MCC_ACTIONS.get(command))
         elif ident == "_hidT":
@@ -360,7 +368,7 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         self._reply(message, _c=reply)
 
     def _touch(self, content):
-        """Turn touchpad swipes into arrow presses."""
+        """Swipe left/right: previous/next track. Swipe up/down: volume, longer = more."""
         phase, point = content.get("_tPh"), (content.get("_cx", 0), content.get("_cy", 0))
         if phase == TouchAction.Press.value:
             self._touch_start = point
@@ -369,9 +377,11 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
             self._touch_start = None
             width, height = self._touchpad
             if abs(dx) >= abs(dy) and abs(dx) > width * SWIPE_FRACTION:
-                self._act("right" if dx > 0 else "left")
+                self._act("next" if dx > 0 else "previous")
             elif abs(dy) > abs(dx) and abs(dy) > height * SWIPE_FRACTION:
-                self._act("down" if dy > 0 else "up")
+                steps = max(1, int(abs(dy) / (height * VOLUME_STEP_FRACTION)))
+                for _ in range(steps):
+                    self._act("volume_down" if dy > 0 else "volume_up")  # y grows downwards
 
     def _act(self, action):
         if action:

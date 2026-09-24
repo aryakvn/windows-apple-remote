@@ -6,13 +6,14 @@ Center) can pair with it and send media keys. PyPI name `atv-remote-server`, imp
 
 ## Status (2026-09-24)
 
+- Session now stays open on the iPhone (CompanionGames-style replies fixed it).
+  The iOS 27 remote shows only a touch area, so control is gesture-based.
+
 - Working against a real iPhone (iOS 27.0, iPhone12,1): mDNS discovery, pair-setup
   with PIN, pair-verify on reconnect, encrypted session, `_systemInfo` decode.
-- **Not yet confirmed:** that the remote session stays open. The iPhone kept sending
-  `TVRCSessionStop` ~30 ms after the setup burst. The latest fix copies the replies
-  of thiccaxe/CompanionGames (see below) and hasn't been tested on a device yet.
-- If it still drops: run CompanionGames itself on the same PC/iPhone. If that also
-  drops, iOS 27 rejects this approach; if it works, diff its logs against ours.
+- Earlier the iPhone sent `TVRCSessionStop` ~30 ms after setup; fixed by the replies
+  listed below. Gestures and hardware-volume routing (`_mcF` Volume bit 0x100) are
+  not yet confirmed on a device.
 
 ## Layout
 
@@ -113,4 +114,10 @@ Messages (`_t`: 1=event, 2=request, 3=response; responses match on `_x`, carry n
   before bumping.
 - Windows Firewall must allow Python on private networks (TCP port + UDP 5353).
 - Windows has one Play/Pause key, so Play and Pause both toggle.
+- Without the Volume bit (0x100) in `_mcF`, iOS doesn't route the iPhone's volume
+  buttons to the device. `SetVolume` (absolute `_vol`) is turned into one relative
+  key step.
+- `atv-remote.exe` running locks the venv: pip can't reinstall (WinError 32) and may
+  leave the package uninstalled. Stop the server before `pip install -e .`, or run
+  tests with `PYTHONPATH=src`.
 - Run with `atv-remote -v` to log every received and sent message.

@@ -5,15 +5,13 @@ Control your Windows PC's media with the **Apple TV Remote** on your iPhone or i
 Companion protocol using [pyatv](https://pyatv.dev), and turns remote buttons into
 media keys.
 
-| Remote                     | PC                              |
-|----------------------------|---------------------------------|
-| Play/Pause                 | Media Play/Pause                |
-| Volume buttons (iPhone)    | Volume Up / Down                |
-| Next / Previous            | Next / Previous track           |
-| Skip ±10s                  | Right / Left arrow              |
-| Swipe or D-pad             | Arrow keys                      |
-| Tap / Select               | Enter                           |
-| Back (Menu)                | Escape                          |
+| Remote (touch area)                  | PC                                   |
+|---------------------------------------|--------------------------------------|
+| Tap                                   | Play/Pause                           |
+| Swipe right / left                    | Next / Previous track                |
+| Swipe up / down (longer = more)       | Volume Up / Down                     |
+| iPhone volume buttons                 | Volume Up / Down                     |
+| Back (Menu)                           | Escape                               |
 
 ## Install & run
 
@@ -41,7 +39,7 @@ atv-remote -v                        # debug logging
   can't connect. mDNS (UDP 5353) must be allowed too.
 - **Forget all paired devices:** delete `%APPDATA%\atv-remote\state.json`. It also
   holds this PC's private identity key, so keep it private.
-- Keys go to whatever window has focus, except media and volume keys, which are global.
+- Media and volume keys are global; Back (Escape) goes to the focused window.
 - Windows has a single Play/Pause key, so the remote's separate Play and Pause both toggle.
 - Now-playing info and the volume slider are not supported (they need AirPlay/MRP).
 - macOS support is planned. HomeKit is not supported.

@@ -33,3 +33,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Answer `_systemInfo` with device info, reply "No request handler" to unknown requests and drop `_i` from responses to match a real Apple TV; log outgoing messages with `-v`.
 - Decode OPACK back-references the way Apple encodes them (skip 1-byte objects like `''`); pyatv's decoder was off by one, so iOS 27's `_systemInfo` arrived without its `_i` and was rejected.
 - Keep the iOS remote session open: answer every message successfully (replacing the "No request handler" errors), return a touch session id from `_touchStart` and flags from `FetchMediaControlStatus`, and send a full Apple TV `_systemInfo` (`_lP`, `_stA` with `com.apple.tvremoteservices`, Siri peer data) with `rpFl=0xB6782` and model `AppleTV5,3`, matching thiccaxe/CompanionGames, a server known to work with the remote.
+
+### Changed
+- Make the touch area a media controller: tap plays/pauses, swipe left/right changes track, swipe up/down changes volume (longer swipe = more steps); D-pad directions map the same way.
+- Advertise volume control (`_mcF` Volume flag) so the iPhone's volume buttons control the PC, and turn `SetVolume` into volume key steps.
+
+### Removed
+- Remove arrow-key, Enter and ±10s skip mappings, which the touch-only iOS remote can't reach.

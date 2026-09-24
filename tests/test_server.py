@@ -55,7 +55,7 @@ async def test_pair_and_control(tmp_path):
         atv.close()
         server.close()
 
-    assert actions == ["play_pause", "volume_up", "next", "left", "select"]
+    assert actions == ["play_pause", "volume_up", "next", "previous", "play_pause"]
 
 
 async def test_wrong_pin_is_rejected(tmp_path):
@@ -141,3 +141,40 @@ def test_ios_remote_session_gets_answers(tmp_path):
     assert info["_lP"] == 49152 and "com.apple.tvremoteservices" in info["_stA"]
     assert replies[9]["_c"] == {"_i": 1}
     assert replies[8]["_c"]["MediaControlFlags"]
+
+
+def _session(tmp_path):
+    server = RemoteServer(Identity(tmp_path / "state.json"), "Test PC", None, print)
+    server.transport = _Transport()
+    actions = []
+    server.on_action = actions.append
+    return server, actions
+
+
+def _swipe(server, start, end):
+    for phase, (x, y) in ((1, start), (3, end), (4, end)):
+        server._handle_message({"_i": "_hidT", "_t": 1, "_x": 0, "_c": {"_tPh": phase, "_cx": x, "_cy": y}})
+
+
+def test_touch_gestures(tmp_path):
+    server, actions = _session(tmp_path)
+    _swipe(server, (200, 500), (800, 500))  # right
+    _swipe(server, (800, 500), (200, 500))  # left
+    _swipe(server, (500, 800), (500, 500))  # up 30% -> 3 steps
+    _swipe(server, (500, 400), (500, 600))  # down 20% -> 2 steps
+    _swipe(server, (500, 500), (520, 510))  # jitter from a tap: ignored
+    assert actions == ["next", "previous"] + ["volume_up"] * 3 + ["volume_down"] * 2
+
+
+def test_volume_from_iphone(tmp_path):
+    server, actions = _session(tmp_path)
+    for vol in (0.6, 0.7, 0.4):
+        server._handle_message({"_i": "_mcc", "_t": 2, "_x": 1, "_c": {"_mcc": 6, "_vol": vol}})
+    assert actions == ["volume_up", "volume_up", "volume_down"]
+
+
+def test_every_action_has_a_key():
+    from atv_remote import keys
+    from atv_remote.server import HID_ACTIONS, MCC_ACTIONS
+
+    assert set(HID_ACTIONS.values()) | set(MCC_ACTIONS.values()) <= set(keys.VIRTUAL_KEYS)
