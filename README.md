@@ -1,4 +1,10 @@
-# atv-remote-server
+# windows-apple-remote
+
+[![CI](https://github.com/aryakvn/windows-apple-remote/actions/workflows/ci.yml/badge.svg)](https://github.com/aryakvn/windows-apple-remote/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/atv-remote-server)](https://pypi.org/project/atv-remote-server/)
+
+Package: [`atv-remote-server`](https://pypi.org/project/atv-remote-server/) · Source:
+[github.com/aryakvn/windows-apple-remote](https://github.com/aryakvn/windows-apple-remote)
 
 Control your Windows PC's media with the **Apple TV Remote** on your iPhone or iPad
 (Control Center → Apple TV Remote). The PC advertises itself as an Apple TV over the
@@ -18,6 +24,12 @@ media keys.
 ```sh
 pip install atv-remote-server
 atv-remote
+```
+
+Or the latest code from GitHub:
+
+```sh
+pip install git+https://github.com/aryakvn/windows-apple-remote.git
 ```
 
 Then on the iPhone (same Wi-Fi network): Control Center → Apple TV Remote → pick your
@@ -47,13 +59,36 @@ atv-remote -v                        # debug logging
 ## Development
 
 ```sh
+git clone https://github.com/aryakvn/windows-apple-remote.git
+cd windows-apple-remote
+python -m venv .venv
+.venv\Scripts\activate
 pip install -e ".[test]"
 pytest
 ```
 
-The tests use pyatv's own client to pair with the server and press buttons end to end.
+Use `pip install -e` (editable). A plain `pip install .` copies the code into the venv
+and later edits stop taking effect. Stop a running `atv-remote` before reinstalling;
+Windows locks its executable.
 
-Releases: bump `__version__` in `src/atv_remote/__init__.py`, then publish a GitHub
-release. The `publish` workflow builds and uploads to PyPI using
-[trusted publishing](https://docs.pypi.org/trusted-publishers/) — add this repo as a
-trusted publisher on PyPI (workflow `publish.yml`, environment `pypi`) once.
+The tests use pyatv's own client to pair with the server and press buttons end to end.
+Bugs and ideas: [issues](https://github.com/aryakvn/windows-apple-remote/issues).
+
+## Releasing to PyPI
+
+Publishing uses [trusted publishing](https://docs.pypi.org/trusted-publishers/), so no
+API token is stored in GitHub. One-time setup:
+
+1. On [pypi.org](https://pypi.org/manage/account/publishing/) add a *pending publisher*:
+   project `atv-remote-server`, owner `aryakvn`, repository `windows-apple-remote`,
+   workflow `publish.yml`, environment `pypi`.
+2. Optional dry run: do the same on [test.pypi.org](https://test.pypi.org/manage/account/publishing/)
+   with environment `testpypi`.
+
+Each release:
+
+1. Bump `__version__` in `src/atv_remote/__init__.py` and move the `Unreleased`
+   entries in `CHANGELOG.md` under the new version.
+2. Optional: run the **Publish** workflow by hand (Actions tab) to upload to TestPyPI.
+3. Publish a GitHub release tagged `vX.Y.Z` (matching `__version__`). The workflow runs
+   the tests, checks the tag against the version, builds, and uploads to PyPI.

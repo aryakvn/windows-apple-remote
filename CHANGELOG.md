@@ -27,6 +27,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add per-install identity, random pairing PIN per attempt, and rejection of unpaired devices on pair-verify.
 - Add end-to-end tests that pair and send commands using pyatv's own client.
 - Add GitHub Actions for Windows CI and PyPI trusted publishing on release.
+- Add TestPyPI dry-run publishing (manual workflow run), a release-tag/version check and `twine check` to the publish workflow; run CI on every push.
+- Add GitHub project links (aryakvn/windows-apple-remote) to the README and package metadata, with PyPI trusted-publisher setup steps.
 
 ### Fixed
 - Encrypt the connection right after pair-setup, since iOS keeps using it, and parse only OPACK frame types, which fixes the `TypeError: 0xc9` disconnect after pairing.
