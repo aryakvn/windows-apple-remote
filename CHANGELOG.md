@@ -22,6 +22,12 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+### Changed
+- Rename the PyPI package from `atv-remote-server` to `windows-apple-remote` to match the repository and the PyPI trusted publisher; the `atv-remote` command and `atv_remote` import are unchanged.
+
+### Fixed
+- Fix the PyPI upload failing with `400 Non-user identities cannot create new projects` (package name didn't match the pending publisher); 0.1.0 was never uploaded.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added

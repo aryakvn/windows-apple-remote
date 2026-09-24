@@ -1,7 +1,7 @@
-# CLAUDE.md — atv-remote-server
+# CLAUDE.md — windows-apple-remote
 
 Makes a Windows PC appear as an Apple TV so the iOS **Apple TV Remote** (Control
-Center) can pair with it and send media keys. PyPI name `atv-remote-server`, import
+Center) can pair with it and send media keys. PyPI name `windows-apple-remote`, import
 `atv_remote`, CLI `atv-remote`. macOS support is planned; HomeKit is out of scope.
 
 ## Status (2026-09-24)
@@ -96,6 +96,70 @@ Messages (`_t`: 1=event, 2=request, 3=response; responses match on `_x`, carry n
   (`TVRCNowPlayingInfo`, `playbackRate`). Not implemented; see pyatv issues #2325
   and #2461.
 
+## README format
+
+Keep `README.md` in this shape so every release reads the same:
+
+1. `# windows-apple-remote` (repo name), then the CI and PyPI badges, then
+   `Package: [\`windows-apple-remote\`](pypi link) · Source: [github.com/aryakvn/windows-apple-remote](repo link)`.
+2. One short paragraph: what it does (iOS Apple TV Remote → Windows media keys, via pyatv).
+3. Mapping table with columns `Remote (touch area) | PC`, one row per gesture or
+   button. It must match `HID_ACTIONS`, `MCC_ACTIONS` and `_touch()` in `server.py`;
+   update it in the same commit as any mapping change.
+4. `## Install & run`: `pip install windows-apple-remote` + `atv-remote`, then the
+   `pip install git+https://github.com/aryakvn/windows-apple-remote.git` alternative,
+   the pairing steps (same Wi-Fi, Control Center → Apple TV Remote, PIN in terminal),
+   and an `Options:` block listing every `cli.py` flag with a one-line comment.
+5. `## Notes`: firewall, state file location, behaviour limits, platform support.
+6. `## Development`: clone, venv, `pip install -e ".[test]"`, `pytest`, and the
+   editable-install warning.
+7. `## Releasing to PyPI`: one-time trusted-publisher values and the per-release
+   steps (keep them in sync with the release process below).
+
+Style: short sentences, second person, Windows commands (`.venv\Scripts\activate`).
+Files must stay UTF-8. On Windows, Python's `read_text()`/`write_text()` default to
+cp1252 and `"\a"` in a normal string becomes a bell character; use the Edit tool or
+bytes with explicit `utf-8`.
+
+## Release process
+
+Versioning is semver: patch for fixes, minor for features; while 0.x, a breaking
+change bumps the minor. Tags are `vX.Y.Z`. Work reaches `main` only through a PR
+from a feature branch; the release commit is the only thing pushed straight to `main`.
+
+1. `main` is up to date and its CI is green.
+2. Bump `__version__` in `src/atv_remote/__init__.py` (if not bumped yet).
+3. Cut the changelog (`changelog:release` skill): rename `## [Unreleased]` to
+   `## [X.Y.Z] - YYYY-MM-DD` and add an empty `## [Unreleased]` above it. Don't touch
+   any entry.
+4. Commit on `main` with the message `Release X.Y.Z` (plus the co-author trailer).
+5. Annotated tag: `git tag -a vX.Y.Z -m "windows-apple-remote X.Y.Z"`, then push `main`
+   and the tag.
+6. GitHub release: tag `vX.Y.Z`, title `vX.Y.Z`, body:
+
+   ````markdown
+   <one-line summary of the release>
+
+   ```
+   pip install windows-apple-remote
+   atv-remote
+   ```
+
+   <the X.Y.Z section of CHANGELOG.md, copied as is: ### Added / Changed / Fixed / Removed>
+   ````
+
+   If something in the release hasn't been tried on a real iPhone, add a
+   `### Known issues` section at the end saying what.
+7. This machine has no `gh` or GitHub login (git pushes over SSH), so build the URL
+   `https://github.com/aryakvn/windows-apple-remote/releases/new?tag=vX.Y.Z&title=vX.Y.Z&body=<url-encoded body>`
+   and open it with PowerShell `Start-Process`; the user clicks **Publish release**.
+   PRs work the same way via `.../compare/main...<branch>?expand=1&title=...&body=...`.
+8. Publishing the release runs `publish.yml`: tests, tag vs `__version__` check,
+   build, `twine check`, upload to PyPI. PyPI versions can't be reused, so offer a
+   TestPyPI dry run first (run the Publish workflow by hand) when a change is untested.
+9. Check the Actions run; if the upload failed because the trusted publisher wasn't
+   set up yet, re-run the failed job after the user adds it.
+
 ## References
 
 - pyatv protocol docs: docs/documentation/protocols.md in postlund/pyatv.
@@ -121,3 +185,9 @@ Messages (`_t`: 1=event, 2=request, 3=response; responses match on `_x`, carry n
   leave the package uninstalled. Stop the server before `pip install -e .`, or run
   tests with `PYTHONPATH=src`.
 - Run with `atv-remote -v` to log every received and sent message.
+- The PyPI trusted publisher's project name must equal `name` in `pyproject.toml`
+  (`windows-apple-remote`). A mismatch still passes the token exchange but the upload
+  fails with `400 Non-user identities cannot create new projects`. That is why v0.1.0
+  (published as `atv-remote-server`) never reached PyPI and 0.1.1 is the first upload.
+- Distribution name is `windows-apple-remote`, but the import package stays
+  `atv_remote` and the command stays `atv-remote`.
