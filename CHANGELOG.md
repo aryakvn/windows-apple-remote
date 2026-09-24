@@ -22,6 +22,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-24
+
 ### Added
 - Add `atv-remote` server that advertises the PC as an Apple TV (Companion protocol via pyatv) so the iOS Apple TV Remote can pair with a PIN and control media keys, volume, arrows, Enter and Escape on Windows.
 - Add per-install identity, random pairing PIN per attempt, and rejection of unpaired devices on pair-verify.
