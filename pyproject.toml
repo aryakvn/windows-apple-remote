@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "atv-remote-server"
+name = "windows-apple-remote"
 dynamic = ["version"]
 description = "Control your PC's media with the iOS Apple TV Remote app (powered by pyatv)."
 readme = "README.md"

@@ -1,7 +1,7 @@
-# CLAUDE.md — atv-remote-server
+# CLAUDE.md — windows-apple-remote
 
 Makes a Windows PC appear as an Apple TV so the iOS **Apple TV Remote** (Control
-Center) can pair with it and send media keys. PyPI name `atv-remote-server`, import
+Center) can pair with it and send media keys. PyPI name `windows-apple-remote`, import
 `atv_remote`, CLI `atv-remote`. macOS support is planned; HomeKit is out of scope.
 
 ## Status (2026-09-24)
@@ -101,12 +101,12 @@ Messages (`_t`: 1=event, 2=request, 3=response; responses match on `_x`, carry n
 Keep `README.md` in this shape so every release reads the same:
 
 1. `# windows-apple-remote` (repo name), then the CI and PyPI badges, then
-   `Package: [\`atv-remote-server\`](pypi link) · Source: [github.com/aryakvn/windows-apple-remote](repo link)`.
+   `Package: [\`windows-apple-remote\`](pypi link) · Source: [github.com/aryakvn/windows-apple-remote](repo link)`.
 2. One short paragraph: what it does (iOS Apple TV Remote → Windows media keys, via pyatv).
 3. Mapping table with columns `Remote (touch area) | PC`, one row per gesture or
    button. It must match `HID_ACTIONS`, `MCC_ACTIONS` and `_touch()` in `server.py`;
    update it in the same commit as any mapping change.
-4. `## Install & run`: `pip install atv-remote-server` + `atv-remote`, then the
+4. `## Install & run`: `pip install windows-apple-remote` + `atv-remote`, then the
    `pip install git+https://github.com/aryakvn/windows-apple-remote.git` alternative,
    the pairing steps (same Wi-Fi, Control Center → Apple TV Remote, PIN in terminal),
    and an `Options:` block listing every `cli.py` flag with a one-line comment.
@@ -133,7 +133,7 @@ from a feature branch; the release commit is the only thing pushed straight to `
    `## [X.Y.Z] - YYYY-MM-DD` and add an empty `## [Unreleased]` above it. Don't touch
    any entry.
 4. Commit on `main` with the message `Release X.Y.Z` (plus the co-author trailer).
-5. Annotated tag: `git tag -a vX.Y.Z -m "atv-remote-server X.Y.Z"`, then push `main`
+5. Annotated tag: `git tag -a vX.Y.Z -m "windows-apple-remote X.Y.Z"`, then push `main`
    and the tag.
 6. GitHub release: tag `vX.Y.Z`, title `vX.Y.Z`, body:
 
@@ -141,7 +141,7 @@ from a feature branch; the release commit is the only thing pushed straight to `
    <one-line summary of the release>
 
    ```
-   pip install atv-remote-server
+   pip install windows-apple-remote
    atv-remote
    ```
 
@@ -185,3 +185,9 @@ from a feature branch; the release commit is the only thing pushed straight to `
   leave the package uninstalled. Stop the server before `pip install -e .`, or run
   tests with `PYTHONPATH=src`.
 - Run with `atv-remote -v` to log every received and sent message.
+- The PyPI trusted publisher's project name must equal `name` in `pyproject.toml`
+  (`windows-apple-remote`). A mismatch still passes the token exchange but the upload
+  fails with `400 Non-user identities cannot create new projects`. That is why v0.1.0
+  (published as `atv-remote-server`) never reached PyPI and 0.1.1 is the first upload.
+- Distribution name is `windows-apple-remote`, but the import package stays
+  `atv_remote` and the command stays `atv-remote`.

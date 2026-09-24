@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/atv-remote-server
+      url: https://pypi.org/p/windows-apple-remote
     permissions:
       id-token: write  # PyPI trusted publishing, no API token needed
     steps:
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/atv-remote-server
+      url: https://test.pypi.org/p/windows-apple-remote
     permissions:
       id-token: write
     steps:

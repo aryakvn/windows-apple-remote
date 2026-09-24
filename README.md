@@ -1,9 +1,9 @@
 # windows-apple-remote
 
 [![CI](https://github.com/aryakvn/windows-apple-remote/actions/workflows/ci.yml/badge.svg)](https://github.com/aryakvn/windows-apple-remote/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/atv-remote-server)](https://pypi.org/project/atv-remote-server/)
+[![PyPI](https://img.shields.io/pypi/v/windows-apple-remote)](https://pypi.org/project/windows-apple-remote/)
 
-Package: [`atv-remote-server`](https://pypi.org/project/atv-remote-server/) · Source:
+Package: [`windows-apple-remote`](https://pypi.org/project/windows-apple-remote/) · Source:
 [github.com/aryakvn/windows-apple-remote](https://github.com/aryakvn/windows-apple-remote)
 
 Control your Windows PC's media with the **Apple TV Remote** on your iPhone or iPad
@@ -22,7 +22,7 @@ media keys.
 ## Install & run
 
 ```sh
-pip install atv-remote-server
+pip install windows-apple-remote
 atv-remote
 ```
 
@@ -80,7 +80,7 @@ Publishing uses [trusted publishing](https://docs.pypi.org/trusted-publishers/),
 API token is stored in GitHub. One-time setup:
 
 1. On [pypi.org](https://pypi.org/manage/account/publishing/) add a *pending publisher*:
-   project `atv-remote-server`, owner `aryakvn`, repository `windows-apple-remote`,
+   project `windows-apple-remote`, owner `aryakvn`, repository `windows-apple-remote`,
    workflow `publish.yml`, environment `pypi`.
 2. Optional dry run: do the same on [test.pypi.org](https://test.pypi.org/manage/account/publishing/)
    with environment `testpypi`.
