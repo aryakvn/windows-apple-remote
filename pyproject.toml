@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "atv-remote-server"
+dynamic = ["version"]
+description = "Control your PC's media with the iOS Apple TV Remote app (powered by pyatv)."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Arya Kavian", email = "aryakvn@gmail.com" }]
+keywords = ["apple tv", "remote", "pyatv", "media keys", "companion"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Multimedia",
+    "Environment :: Console",
+]
+dependencies = [
+    # Pinned to a minor: we build on pyatv internals (server auth, companion framing).
+    "pyatv>=0.18,<0.19",
+    "zeroconf>=0.131",
+    "cryptography>=42",
+]
+
+[project.urls]
+Homepage = "https://github.com/aryakvn/windows-apple-remote"
+Issues = "https://github.com/aryakvn/windows-apple-remote/issues"
+Changelog = "https://github.com/aryakvn/windows-apple-remote/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+atv-remote = "atv_remote.cli:main"
+
+[tool.hatch.version]
+path = "src/atv_remote/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/atv_remote"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
