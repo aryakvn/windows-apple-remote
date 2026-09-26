@@ -79,6 +79,9 @@ MEDIA_FLAGS = (
 )
 SWIPE_FRACTION = 0.15  # swipe must cover this share of the touchpad to count
 VOLUME_STEP_FRACTION = 0.1  # each extra 10% of vertical swipe = one more volume step
+# iOS 27 sends drags as _tPh 2; pyatv's TouchAction only knows 3 (Hold).
+TOUCH_DRAG = {2, TouchAction.Hold.value}
+MOUSE_SPEED = 1.5  # cursor pixels per touchpad unit (the touchpad is 1000 units wide)
 
 
 class _RefTable(list):
@@ -181,18 +184,21 @@ class Identity:
 class RemoteServer(CompanionServerAuth, asyncio.Protocol):
     """One connection from an iOS device."""
 
-    def __init__(self, identity, name, on_action, on_pin):
+    def __init__(self, identity, name, on_action, on_pin, on_move=None):
         super().__init__(name, unique_id=identity.id)
         self.keys = generate_keys(identity.seed)
         self.identity = identity
         self.on_action = on_action
         self.on_pin = on_pin
+        self.on_move = on_move  # (dx, dy) in pixels; mouse mode needs it
+        self.mouse_mode = False  # TV button toggles: touch area moves the cursor
         self.transport = None
         self.buffer = b""
         self.chacha = None
         self._client_verify_pub = None
         self._touchpad = (1000.0, 1000.0)
         self._touch_start = None
+        self._mouse_rest = (0.0, 0.0)
         self._volume = 0.5  # what we last told the iPhone; SetVolume moves relative to it
 
     # asyncio.Protocol
@@ -333,7 +339,14 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
             port = self.transport.get_extra_info("sockname")[1]
             reply = self.identity.system_info(self.device_name, port)
         elif ident == "_hidC" and content.get("_hBtS") == 2:  # 2 = button released
-            self._act(HID_ACTIONS.get(_enum(HidCommand, content.get("_hidC"))))
+            command = _enum(HidCommand, content.get("_hidC"))
+            if command == HidCommand.Home and self.on_move:  # the TV button
+                self.mouse_mode = not self.mouse_mode
+                _LOGGER.info("Mouse mode %s", "on" if self.mouse_mode else "off")
+            elif command == HidCommand.Select and self.mouse_mode:
+                self._act("left_click")
+            else:
+                self._act(HID_ACTIONS.get(command))
         elif ident == "_mcc":
             command = _enum(MediaControlCommand, content.get("_mcc"))
             if command == MediaControlCommand.GetVolume:
@@ -368,8 +381,24 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         self._reply(message, _c=reply)
 
     def _touch(self, content):
-        """Swipe left/right: previous/next track. Swipe up/down: volume, longer = more."""
+        """Mouse mode: drag moves the cursor. Otherwise swipe left/right: previous/next track. Swipe up/down: volume, longer = more."""
         phase, point = content.get("_tPh"), (content.get("_cx", 0), content.get("_cy", 0))
+        if self.mouse_mode:
+            # Only drag moves: the Release point jumps as the finger lifts.
+            if phase in TOUCH_DRAG and self._touch_start:
+                last, self._touch_start = self._touch_start, point
+                # Carry sub-pixel remainders so slow drags don't stall or stutter.
+                x = (point[0] - last[0]) * MOUSE_SPEED + self._mouse_rest[0]
+                y = (point[1] - last[1]) * MOUSE_SPEED + self._mouse_rest[1]
+                dx, dy = round(x), round(y)
+                self._mouse_rest = (x - dx, y - dy)
+                if dx or dy:
+                    self.on_move(dx, dy)
+            elif phase == TouchAction.Press.value:
+                self._touch_start, self._mouse_rest = point, (0.0, 0.0)
+            elif phase == TouchAction.Release.value:
+                self._touch_start = None
+            return
         if phase == TouchAction.Press.value:
             self._touch_start = point
         elif phase == TouchAction.Release.value and self._touch_start:

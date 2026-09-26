@@ -88,7 +88,7 @@ Messages (`_t`: 1=event, 2=request, 3=response; responses match on `_x`, carry n
   `_siriInfo.peerData` with `userInterfaceIdiom: "ZEUS"` (Apple TV).
 - Input: `_hidC` with `_hBtS` 1=down / 2=up and `_hidC` = pyatv `HidCommand`; a tap
   on the touchpad also arrives as `_hidC` Select. `_hidT` touch events: `_tPh`
-  1=start, 3=move, 4=end, 5=click; `_cx/_cy` 0–1000. `_mcc` = pyatv
+  1=start, 2=move (iOS 27; pyatv's `TouchAction` has 3=Hold), 4=end, 5=click; `_cx/_cy` 0–1000. `_mcc` = pyatv
   `MediaControlCommand` (`SkipBy` carries `_skpS`).
 - Real `FetchSiriRemoteInfo` reply is `{"SiriRemoteInfoKey": <NSKeyedArchiver
   bplist of TVRCSiriRemoteInfo>}`; `SupportedActions` event carries
@@ -109,7 +109,9 @@ Keep `README.md` in this shape so every release reads the same:
 4. `## Install & run`: `pip install windows-apple-remote` + `atv-remote`, then the
    `pip install git+https://github.com/aryakvn/windows-apple-remote.git` alternative,
    the pairing steps (same Wi-Fi, Control Center → Apple TV Remote, PIN in terminal),
-   and an `Options:` block listing every `cli.py` flag with a one-line comment.
+   and an `Options:` block listing every `cli.py` flag with a one-line comment, then
+   `### Mouse mode` and `### If the PC doesn't show up on the iPhone` (wrong adapter →
+   `--address`, `python -m atv_remote` when `atv-remote` isn't on PATH).
 5. `## Notes`: firewall, state file location, behaviour limits, platform support.
 6. `## Development`: clone, venv, `pip install -e ".[test]"`, `pytest`, and the
    editable-install warning.
