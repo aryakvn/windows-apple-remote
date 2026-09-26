@@ -22,6 +22,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+### Added
+
+- Add mouse mode: the remote's TV button toggles it, then dragging on the touch area moves the cursor and a tap left-clicks.
+
 ## [0.1.2] - 2026-09-26
 
 ### Fixed

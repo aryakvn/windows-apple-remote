@@ -18,6 +18,8 @@ media keys.
 | Swipe up / down (longer = more)       | Volume Up / Down                     |
 | iPhone volume buttons                 | Volume Up / Down                     |
 | Back (Menu)                           | Escape                               |
+| TV button                             | Toggle mouse mode                    |
+| Drag / Tap (mouse mode)               | Move cursor / Left click             |
 
 ## Install & run
 

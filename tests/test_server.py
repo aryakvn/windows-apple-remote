@@ -166,6 +166,21 @@ def test_touch_gestures(tmp_path):
     assert actions == ["next", "previous"] + ["volume_up"] * 3 + ["volume_down"] * 2
 
 
+def test_tv_button_toggles_mouse_mode(tmp_path):
+    server, actions = _session(tmp_path)
+    moves = []
+    server.on_move = lambda dx, dy: moves.append((dx, dy))
+    tv_button = {"_i": "_hidC", "_t": 2, "_x": 1, "_c": {"_hidC": 7, "_hBtS": 2}}
+    tap = {"_i": "_hidC", "_t": 2, "_x": 1, "_c": {"_hidC": 6, "_hBtS": 2}}
+    server._handle_message(tv_button)
+    _swipe(server, (200, 500), (800, 400))
+    server._handle_message(tap)
+    server._handle_message(tv_button)
+    _swipe(server, (200, 500), (800, 500))
+    assert moves == [(900, -150), (0, 0)]
+    assert actions == ["left_click", "next"]
+
+
 def test_volume_from_iphone(tmp_path):
     server, actions = _session(tmp_path)
     for vol in (0.6, 0.7, 0.4):

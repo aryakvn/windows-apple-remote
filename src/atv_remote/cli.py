@@ -45,7 +45,7 @@ async def serve(args):
     identity = Identity(args.state)
     loop = asyncio.get_running_loop()
     server = await loop.create_server(
-        lambda: RemoteServer(identity, args.name, keys.press, show_pin), "0.0.0.0", args.port
+        lambda: RemoteServer(identity, args.name, keys.press, show_pin, keys.move), "0.0.0.0", args.port
     )
     port = server.sockets[0].getsockname()[1]
     ip = args.address or local_ip()
