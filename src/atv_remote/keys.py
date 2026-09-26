@@ -1,6 +1,7 @@
 """Turn remote actions into OS key presses. Windows only for now."""
 
 import ctypes
+import ctypes.wintypes
 import sys
 
 # Windows virtual-key codes
@@ -12,7 +13,7 @@ VIRTUAL_KEYS = {
     "volume_down": 0xAE,
     "back": 0x1B,  # Escape
 }
-MOUSEEVENTF_MOVE, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP = 0x1, 0x2, 0x4
+MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP = 0x2, 0x4
 KEYEVENTF_EXTENDEDKEY = 0x1
 KEYEVENTF_KEYUP = 0x2
 NOT_EXTENDED = {0x1B}
@@ -33,5 +34,12 @@ def press(action):
 
 
 def move(dx, dy):
-    """Move the cursor by (dx, dy) pixels."""
-    ctypes.windll.user32.mouse_event(MOUSEEVENTF_MOVE, dx, dy, 0, 0)
+    """Move the cursor by exactly (dx, dy) pixels.
+
+    SetCursorPos instead of a relative mouse_event: Windows pointer acceleration
+    scales each small relative step differently, which made touch drags jumpy.
+    """
+    user32 = ctypes.windll.user32
+    point = ctypes.wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(point))
+    user32.SetCursorPos(point.x + dx, point.y + dy)

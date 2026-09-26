@@ -196,6 +196,7 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         self._client_verify_pub = None
         self._touchpad = (1000.0, 1000.0)
         self._touch_start = None
+        self._mouse_rest = (0.0, 0.0)
         self._volume = 0.5  # what we last told the iPhone; SetVolume moves relative to it
 
     # asyncio.Protocol
@@ -381,11 +382,18 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         """Mouse mode: drag moves the cursor. Otherwise swipe left/right: previous/next track. Swipe up/down: volume, longer = more."""
         phase, point = content.get("_tPh"), (content.get("_cx", 0), content.get("_cy", 0))
         if self.mouse_mode:
-            if phase in (TouchAction.Hold.value, TouchAction.Release.value) and self._touch_start:
+            # Only Hold moves: the Release point jumps as the finger lifts.
+            if phase == TouchAction.Hold.value and self._touch_start:
                 last, self._touch_start = self._touch_start, point
-                self.on_move(round((point[0] - last[0]) * MOUSE_SPEED), round((point[1] - last[1]) * MOUSE_SPEED))
-            if phase == TouchAction.Press.value:
-                self._touch_start = point
+                # Carry sub-pixel remainders so slow drags don't stall or stutter.
+                x = (point[0] - last[0]) * MOUSE_SPEED + self._mouse_rest[0]
+                y = (point[1] - last[1]) * MOUSE_SPEED + self._mouse_rest[1]
+                dx, dy = round(x), round(y)
+                self._mouse_rest = (x - dx, y - dy)
+                if dx or dy:
+                    self.on_move(dx, dy)
+            elif phase == TouchAction.Press.value:
+                self._touch_start, self._mouse_rest = point, (0.0, 0.0)
             elif phase == TouchAction.Release.value:
                 self._touch_start = None
             return

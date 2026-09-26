@@ -175,9 +175,11 @@ def test_tv_button_toggles_mouse_mode(tmp_path):
     server._handle_message(tv_button)
     _swipe(server, (200, 500), (800, 400))
     server._handle_message(tap)
+    for phase, x in ((1, 100), (3, 100.4), (3, 100.8), (3, 101.2), (4, 300)):  # slow drag, jumpy lift
+        server._handle_message({"_i": "_hidT", "_t": 1, "_x": 0, "_c": {"_tPh": phase, "_cx": x, "_cy": 0}})
     server._handle_message(tv_button)
     _swipe(server, (200, 500), (800, 500))
-    assert moves == [(900, -150), (0, 0)]
+    assert moves == [(900, -150), (1, 0), (1, 0)]
     assert actions == ["left_click", "next"]
 
 
