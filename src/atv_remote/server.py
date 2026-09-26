@@ -79,6 +79,8 @@ MEDIA_FLAGS = (
 )
 SWIPE_FRACTION = 0.15  # swipe must cover this share of the touchpad to count
 VOLUME_STEP_FRACTION = 0.1  # each extra 10% of vertical swipe = one more volume step
+# iOS 27 sends drags as _tPh 2; pyatv's TouchAction only knows 3 (Hold).
+TOUCH_DRAG = {2, TouchAction.Hold.value}
 MOUSE_SPEED = 1.5  # cursor pixels per touchpad unit (the touchpad is 1000 units wide)
 
 
@@ -382,8 +384,8 @@ class RemoteServer(CompanionServerAuth, asyncio.Protocol):
         """Mouse mode: drag moves the cursor. Otherwise swipe left/right: previous/next track. Swipe up/down: volume, longer = more."""
         phase, point = content.get("_tPh"), (content.get("_cx", 0), content.get("_cy", 0))
         if self.mouse_mode:
-            # Only Hold moves: the Release point jumps as the finger lifts.
-            if phase == TouchAction.Hold.value and self._touch_start:
+            # Only drag moves: the Release point jumps as the finger lifts.
+            if phase in TOUCH_DRAG and self._touch_start:
                 last, self._touch_start = self._touch_start, point
                 # Carry sub-pixel remainders so slow drags don't stall or stutter.
                 x = (point[0] - last[0]) * MOUSE_SPEED + self._mouse_rest[0]
