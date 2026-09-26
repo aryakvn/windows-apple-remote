@@ -109,7 +109,9 @@ Keep `README.md` in this shape so every release reads the same:
 4. `## Install & run`: `pip install windows-apple-remote` + `atv-remote`, then the
    `pip install git+https://github.com/aryakvn/windows-apple-remote.git` alternative,
    the pairing steps (same Wi-Fi, Control Center → Apple TV Remote, PIN in terminal),
-   and an `Options:` block listing every `cli.py` flag with a one-line comment.
+   and an `Options:` block listing every `cli.py` flag with a one-line comment, then
+   `### Mouse mode` and `### If the PC doesn't show up on the iPhone` (wrong adapter →
+   `--address`, `python -m atv_remote` when `atv-remote` isn't on PATH).
 5. `## Notes`: firewall, state file location, behaviour limits, platform support.
 6. `## Development`: clone, venv, `pip install -e ".[test]"`, `pytest`, and the
    editable-install warning.

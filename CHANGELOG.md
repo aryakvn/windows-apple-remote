@@ -25,6 +25,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Added
 
 - Add mouse mode: the remote's TV button toggles it, then dragging on the touch area moves the cursor and a tap left-clicks.
+- Document mouse mode, `pipx`/`py -m pip`/`python -m atv_remote` installs, and the `--address` fix for a PC that doesn't show up on the iPhone in the README.
 
 ## [0.1.2] - 2026-09-26
 
