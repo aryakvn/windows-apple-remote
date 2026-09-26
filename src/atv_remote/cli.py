@@ -23,10 +23,18 @@ def default_state_path():
 
 
 def local_ip():
-    """IP of the interface that routes to the mDNS multicast group (no packet is sent)."""
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.connect(("224.0.0.251", 5353))
-        return sock.getsockname()[0]
+    """IP of the interface that routes to mDNS multicast, else to the internet (no packet is sent).
+
+    With VPN/VM adapters Windows can refuse the multicast lookup (WinError 10065).
+    """
+    for host in ("224.0.0.251", "8.8.8.8"):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.connect((host, 5353))
+                return sock.getsockname()[0]
+        except OSError:
+            pass
+    return socket.gethostbyname(socket.gethostname())
 
 
 def show_pin(pin):

@@ -22,6 +22,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+### Fixed
+
+- Fall back to the default-route IP when Windows refuses the mDNS multicast route lookup (`WinError 10065`), so `atv-remote` starts on PCs with VPN or VM adapters.
+
 ## [0.1.1] - 2026-09-24
 
 ### Changed

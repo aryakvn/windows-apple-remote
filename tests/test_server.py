@@ -178,3 +178,19 @@ def test_every_action_has_a_key():
     from atv_remote.server import HID_ACTIONS, MCC_ACTIONS
 
     assert set(HID_ACTIONS.values()) | set(MCC_ACTIONS.values()) <= set(keys.VIRTUAL_KEYS)
+
+
+def test_local_ip_falls_back_when_multicast_unreachable(monkeypatch):
+    import socket
+
+    from atv_remote import cli
+
+    real_connect = socket.socket.connect
+
+    def connect(sock, addr):
+        if addr[0] == "224.0.0.251":
+            raise OSError(10065, "unreachable")
+        return real_connect(sock, addr)
+
+    monkeypatch.setattr(socket.socket, "connect", connect)
+    assert cli.local_ip() != "0.0.0.0"
